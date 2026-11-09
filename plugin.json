@@ -1,0 +1,114 @@
+{
+  "id": "bronos.gitea",
+  "name": "Gitea / Forgejo",
+  "version": "0.1.0",
+  "api": 1,
+  "main": "dist/host.js",
+  "description": "Your Gitea or Forgejo work in lanes: pull requests waiting for your review, what happens on your own PRs, issues assigned to or mentioning you, and your failed CI runs, with unread marks and Discuss with Claude. Signs in with a server address and an access token. Writes only to mark the server's notifications read and, where the server can, to re-run failed jobs. Provides an inbox-feed for Inbox.",
+  "author": "Oleg Bronzov",
+  "license": "MIT",
+  "services": {
+    "provides": {
+      "inbox-feed": 2
+    }
+  },
+  "contributes": {
+    "panels": [
+      {
+        "id": "main",
+        "title": "Gitea / Forgejo",
+        "icon": "icons/gitea.svg",
+        "entry": "panels/main.html",
+        "defaultZone": "right"
+      }
+    ],
+    "settings": {
+      "project": {
+        "type": "object",
+        "properties": {
+          "serverUrl": {
+            "type": "string",
+            "title": "Server address",
+            "description": "Your Gitea or Forgejo server, such as https://git.example.com (with its path, if it lives under one). https only; http only for localhost.",
+            "maxLength": 500,
+            "default": ""
+          },
+          "token": {
+            "type": "string",
+            "format": "secret",
+            "title": "Access token",
+            "description": "A personal access token from the server (Settings > Applications) with read:issue, read:repository, read:organization, read:notification and write:notification. Kept in the system keychain."
+          },
+          "lanes": {
+            "type": "object",
+            "title": "Lanes",
+            "description": "Which lanes to show. A hidden lane is not fetched and its items never reach Inbox.",
+            "additionalProperties": false,
+            "properties": {
+              "reviewRequested": {
+                "type": "boolean",
+                "title": "Review requested",
+                "default": true
+              },
+              "myPrs": {
+                "type": "boolean",
+                "title": "My pull requests",
+                "default": true
+              },
+              "issues": {
+                "type": "boolean",
+                "title": "Issues (assigned or mentioning me)",
+                "default": true
+              },
+              "failedRuns": {
+                "type": "boolean",
+                "title": "Failed runs",
+                "default": true
+              }
+            },
+            "default": {
+              "reviewRequested": true,
+              "myPrs": true,
+              "issues": true,
+              "failedRuns": true
+            }
+          },
+          "rowsPerLane": {
+            "type": "integer",
+            "title": "Items per lane",
+            "description": "How many items a lane shows; the rest are behind Show all at the bottom of the lane.",
+            "minimum": 1,
+            "maximum": 300,
+            "default": 10
+          },
+          "markReadOnOpen": {
+            "type": "boolean",
+            "title": "Mark an item read when I open it",
+            "description": "On: opening an item (here or from Inbox) marks it read. Off: it stays unread until you press Mark read.",
+            "default": true
+          },
+          "exclude": {
+            "type": "array",
+            "title": "Leave out",
+            "description": "Owners (acme) or repositories (acme/widgets) whose items are not shown, any letter case.",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "title": "Owner or owner/repo",
+              "maxLength": 140
+            },
+            "default": []
+          },
+          "pollMinutes": {
+            "type": "integer",
+            "title": "Check every (minutes)",
+            "description": "Pull requests and issues; failed runs are checked every 5 minutes at most. Only while this project's window is open.",
+            "minimum": 2,
+            "maximum": 15,
+            "default": 2
+          }
+        }
+      }
+    }
+  }
+}

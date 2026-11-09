@@ -1,0 +1,7 @@
+{
+  "$comment": "A copy of the label and action tables of cc-cockpit-github docs/item-convention.md (the shared convention of code-host sources). Update both together: a new label or action goes into that document first.",
+  "labels": ["pr", "issue", "run", "review-requested", "team-review-requested", "my-pr", "assigned", "mentioned", "changes-requested", "approved", "ci:failed", "ci:pending", "conflict", "draft"],
+  "labelPrefixes": ["repo:", "owner:"],
+  "actions": ["open", "markRead", "markUnread", "done", "rerun", "openWeb"],
+  "ids": ["pr:<owner>/<repo>#<number>", "issue:<owner>/<repo>#<number>", "run:<owner>/<repo>/<run>"]
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- Copied from cc-cockpit-github panels/main.html; keep in step (only host names differ). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gitea / Forgejo</title>
+    <!-- The GitHub panel: lanes of review requests, the person's PRs, issues and failed runs. The host sends the rows;
+      a click opens the item's overlay, a right click (or the context-menu key) lists its actions. -->
+    <script src="/__sdk/panel.js"></script>
+    <script src="rowlogic.js"></script>
+    <script src="main.js" defer></script>
+    <style>
+      body { margin: 0; background: var(--cc-bg); color: var(--cc-fg); }
+      #wrap { padding: 4px 8px 12px; }
+      #banner { margin: 8px 4px; }
+      #notice { position: sticky; bottom: 0; margin: 8px 4px 0; }
+      .cc-row-meta .cc-badge { margin-left: 6px; }
+      /* The component stylesheet gives .cc-row a default cursor; these rows open the item, as the Inbox's do. */
+      .cc-list > .cc-row { cursor: pointer; }
+      .gh-more { margin: 2px 0 6px 4px; }
+      .gh-none { margin: 4px 8px; font-size: var(--cc-text-s); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <div id="banner" hidden></div>
+      <div id="lanes"></div>
+      <div id="notice" class="cc-error-line" role="status" hidden></div>
+    </div>
+  </body>
+</html>

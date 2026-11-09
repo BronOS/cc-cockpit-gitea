@@ -1,0 +1,58 @@
+<!doctype html>
+<!-- Copied from cc-cockpit-github panels/item.html; keep in step (only host names differ). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Item</title>
+    <!-- The item overlay: a PR, an issue or a failed run, drawn from the details the host fetched. GitHub's HTML goes
+      through sanitize.js; logs and diffs are text. Links ask first and the host opens only links it found itself. -->
+    <script src="/__sdk/panel.js"></script>
+    <script src="sanitize.js"></script>
+    <script src="itemview.js"></script>
+    <script src="item.js" defer></script>
+    <style>
+      body { margin: 0; padding: 0 16px 16px; background: var(--cc-bg); color: var(--cc-fg); }
+      #main { max-width: 980px; }
+      .gh-head { position: sticky; top: 0; z-index: 1; background: var(--cc-bg); padding: 10px 0 8px; border-bottom: 1px solid var(--cc-border); margin-bottom: 10px; }
+      .gh-title { font-size: 16px; margin: 0 0 6px; overflow-wrap: anywhere; }
+      .gh-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: var(--cc-text-s); }
+      .gh-tabs { margin-bottom: 10px; }
+      .gh-body { margin-bottom: 12px; overflow-wrap: anywhere; }
+      .gh-timeline { display: flex; flex-direction: column; gap: 8px; }
+      .gh-event { overflow-wrap: anywhere; }
+      .gh-event.gh-changes { box-shadow: inset 3px 0 0 var(--cc-status-needs-permission); }
+      .gh-event.gh-approved { box-shadow: inset 3px 0 0 var(--cc-status-working); }
+      .gh-event-head { margin-bottom: 4px; }
+      .gh-checks { display: flex; flex-direction: column; gap: 8px; }
+      .gh-check { border: 1px solid var(--cc-border); border-radius: 6px; padding: 6px 10px; }
+      .gh-check.gh-failed { border-color: var(--cc-status-needs-permission); }
+      .gh-check-head { display: flex; gap: 8px; align-items: center; }
+      .gh-check-name { font-weight: 600; }
+      .gh-link { margin-left: auto; font-size: var(--cc-text-s); }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.5 var(--cc-font-mono, ui-monospace, monospace); background: var(--cc-surface-1); padding: 8px 10px; border-radius: 6px; max-height: 480px; overflow: auto; }
+      code { font-family: var(--cc-font-mono, ui-monospace, monospace); font-size: 12px; }
+      blockquote { margin: 8px 0; padding: 2px 12px; border-left: 3px solid var(--cc-border-strong); color: var(--cc-fg-muted); }
+      table { border-collapse: collapse; margin: 8px 0; }
+      th, td { border: 1px solid var(--cc-border); padding: 4px 8px; }
+      a { color: var(--cc-accent); }
+      .gh-file { border: 1px solid var(--cc-border); border-radius: 6px; margin-bottom: 6px; }
+      .gh-file > summary { cursor: pointer; padding: 4px 8px; font-family: var(--cc-font-mono, ui-monospace, monospace); font-size: 12px; }
+      .gh-file pre { margin: 0; border-radius: 0 0 6px 6px; }
+      .gh-add, .gh-diff-add { color: var(--cc-status-working); }
+      .gh-del, .gh-diff-del { color: var(--cc-status-needs-permission); }
+      .gh-diff-hunk { color: var(--cc-fg-muted); }
+      #ask { position: fixed; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--cc-bg-menu); border: 1px solid var(--cc-border-strong); border-radius: 6px; z-index: 2; }
+      #ask-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--cc-text-s); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main id="main"></main>
+    <div id="ask" role="dialog" aria-label="Open link" hidden>
+      <span>Open in your browser?</span>
+      <span id="ask-url" class="cc-muted"></span>
+      <button id="ask-open" type="button" class="cc-primary">Open</button>
+      <button id="ask-cancel" type="button">Cancel</button>
+    </div>
+  </body>
+</html>
