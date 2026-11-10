@@ -20,8 +20,12 @@ const KEEP_REVIEWS = 50
 const COMMENTS_CAP = 2 * 1024 * 1024
 const TEAMS_TTL = 3600_000
 
-/** The searches each enabled lane needs, by key. Issues are two searches (assigned, mentioned), merged later. */
-function queries(lanes) {
+/**
+ * The searches each enabled lane needs, by key. Issues are two searches (assigned, mentioned), merged later, and a
+ * third (`created`) when the person wants the issues they opened too: on a team where nobody assigns, the issues a
+ * person files for themselves are their work, and neither assigned nor mentioned finds them.
+ */
+function queries(lanes, { myIssues = false } = {}) {
   const q = {}
   const base = { state: 'open' }
   if (lanes.reviewRequested) q.reviewRequested = { ...base, type: 'pulls', review_requested: true }
@@ -29,6 +33,7 @@ function queries(lanes) {
   if (lanes.issues) {
     q.assigned = { ...base, type: 'issues', assigned: true }
     q.mentioned = { ...base, type: 'issues', mentioned: true }
+    if (myIssues) q.created = { ...base, type: 'issues', created: true }
   }
   return q
 }
@@ -36,9 +41,9 @@ function queries(lanes) {
 const stops = (e) => e && (e.signedOut || e.rateLimited || e.network)
 
 /** `{ results: { key: Issue[] } }`: one search per query, 2 pages of 50 at most. */
-async function searchAll(client, lanes) {
+async function searchAll(client, lanes, opts) {
   const results = {}
-  for (const [key, query] of Object.entries(queries(lanes))) {
+  for (const [key, query] of Object.entries(queries(lanes, opts))) {
     results[key] = await client.pages('/repos/issues/search', { query, pages: SEARCH_PAGES, limit: SEARCH_LIMIT })
   }
   return { results }

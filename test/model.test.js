@@ -118,6 +118,22 @@ test('issues: assigned and mentioned merged; to direct or cc; rev from others co
   assert.equal(cc.preview, 'Opened by alice')
 })
 
+test('issues I opened: my-issue, no to; also assigned to me: both labels and direct', () => {
+  const mine = build({ created: [issue(8, { pr: false, author: 'me' })] })[0]
+  assert.equal(mine.id, 'issue:acme/widgets#8')
+  assert.deepEqual(mine.labels, ['issue', 'my-issue', 'repo:acme/widgets', 'owner:acme'])
+  assert.equal(mine.to, undefined)
+  assert.equal(mine.preview, 'Opened by me')
+  assert.deepEqual(mine._.lanes, ['issues'])
+  const both = issue(9, { pr: false, author: 'me', assignees: ['me'] })
+  const it = build({ assigned: [both], created: [both] })
+  assert.equal(it.length, 1)
+  assert.deepEqual(it[0].labels, ['issue', 'assigned', 'my-issue', 'repo:acme/widgets', 'owner:acme'])
+  assert.equal(it[0].to, 'direct')
+  // A pull request in the created search is not an issue (the PR lane has it).
+  assert.equal(build({ created: [issue(10, { author: 'me' })] }).length, 0)
+})
+
 test('mentions: a whole login only, dots allowed in Gitea logins', () => {
   assert.equal(mentions('ping @me', 'me'), true)
   assert.equal(mentions('thanks @me.', 'me'), true)

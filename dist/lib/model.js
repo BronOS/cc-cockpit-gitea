@@ -164,7 +164,7 @@ function prItem(it, e, inLanes, { me, base, teamIds }) {
   return item
 }
 
-/** An issue to an item. `inQueries`: `assigned` and/or `mentioned`. */
+/** An issue to an item. `inQueries`: `assigned`, `mentioned` and/or `created` (the person opened it). */
 function issueItem(it, e, inQueries, { me, base }) {
   const full = it.repository.full_name
   const assigned = (it.assignees || []).some((a) => same(login(a), me)) || inQueries.includes('assigned')
@@ -173,8 +173,12 @@ function issueItem(it, e, inQueries, { me, base }) {
   const labels = ['issue']
   if (assigned) labels.push('assigned')
   if (inQueries.includes('mentioned')) labels.push('mentioned')
-  labels.push(...repoLabels(full))
   const author = login(it.user)
+  // `my-issue` as `my-pr`: from the author, not only the search that found it, so an issue of theirs that is also
+  // assigned to them carries both labels.
+  const mine = inQueries.includes('created') || (!!author && same(author, me))
+  if (mine) labels.push('my-issue')
+  labels.push(...repoLabels(full))
   const item = {
     id: `issue:${full}#${it.number}`,
     rev: `c:${newest ? newest.at : ms(it.created_at)}`,
@@ -184,10 +188,12 @@ function issueItem(it, e, inQueries, { me, base }) {
     read: false,
     place: { kind: 'project', name: line(full, CAP.place), status: 'open' },
     labels,
-    to: assigned ? 'direct' : 'cc',
     actions: [],
     _: { kind: 'issue', url: webOf(base, full, 'issue', it.number), lanes: ['issues'], repo: full, number: it.number, author },
   }
+  // `to` as the convention has it: absent on the person's own items, unless it is also assigned to them.
+  if (assigned) item.to = 'direct'
+  else if (!mine) item.to = 'cc'
   const fromWho = newest ? newest.who : author
   if (fromWho) item.from = { name: line(fromWho, CAP.from) }
   if (newest && mentions(newest.text, me)) item.mentionsMe = true
@@ -200,7 +206,7 @@ function valid(it) {
 }
 
 /**
- * Every item from one poll: `results` (`{ reviewRequested, myPrs, assigned, mentioned }` search lists), `enriched`
+ * Every item from one poll: `results` (`{ reviewRequested, myPrs, assigned, mentioned, created }` search lists), `enriched`
  * (search.js: Map `owner/repo#n` → facts), `ctx` `{ me, base, teamIds }`. Excluded repos are left out; a result in
  * two searches is one item with both facts.
  */
@@ -217,7 +223,7 @@ function buildItems(results, enriched, settings, ctx) {
   for (const key of ['reviewRequested', 'myPrs']) {
     for (const it of results[key] || []) if (valid(it) && it.pull_request && !isExcluded(it.repository.full_name, settings)) note(prLanes, it, key)
   }
-  for (const key of ['assigned', 'mentioned']) {
+  for (const key of ['assigned', 'mentioned', 'created']) {
     for (const it of results[key] || []) if (valid(it) && !it.pull_request && !isExcluded(it.repository.full_name, settings)) note(issueQs, it, key)
   }
   const items = []

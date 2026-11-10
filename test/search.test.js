@@ -27,6 +27,18 @@ test('queries: one per enabled lane, issues as assigned + mentioned, open only',
   assert.deepEqual(q.myPrs, { state: 'open', type: 'pulls', created: true })
   assert.deepEqual(q.mentioned, { state: 'open', type: 'issues', mentioned: true })
   assert.deepEqual(Object.keys(queries({ ...ALL, issues: false, reviewRequested: false })), ['myPrs'])
+  // Issues I opened: a third issues search, only with the setting and only with the Issues lane on.
+  assert.deepEqual(queries(ALL, { myIssues: true }).created, { state: 'open', type: 'issues', created: true })
+  assert.equal(queries(ALL).created, undefined)
+  assert.equal(queries({ ...ALL, issues: false }, { myIssues: true }).created, undefined)
+})
+
+test('searchAll: with myIssues, the issues the person opened come back under created', async () => {
+  const { srv, client } = setup({ search: { created: [issue(7, { pr: false })] } })
+  const { results } = await searchAll(client, ALL, { myIssues: true })
+  assert.deepEqual(results.created.map((i) => i.number), [7])
+  const searches = srv.calls.filter((c) => c.url.includes('/repos/issues/search')).map((c) => new URL(c.url).searchParams)
+  assert.ok(searches.some((s) => s.get('created') === 'true' && s.get('type') === 'issues'))
 })
 
 test('searchAll: each lane searched with its flags, 2 pages of 50 at most', async () => {

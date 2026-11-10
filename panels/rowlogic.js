@@ -22,6 +22,7 @@
     ['draft', 'draft', 'grey'],
     ['team-review-requested', 'team', 'violet'],
     ['mentioned', 'mentioned', 'blue'],
+    ['my-issue', 'mine', 'grey'],
   ]
 
   /** `just now`, `5 min`, `3 h`, `2 d`, or a date past two weeks. */

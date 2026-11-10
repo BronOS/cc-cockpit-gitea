@@ -71,7 +71,7 @@ function tokenOf(raw) {
 }
 
 /**
- * `{ server, serverProblem, hasToken, lanes, rowsPerLane, markReadOnOpen, exclude, pollMinutes, warnings }` from
+ * `{ server, serverProblem, hasToken, lanes, rowsPerLane, markReadOnOpen, myIssues, exclude, pollMinutes, warnings }` from
  * `ctx.settings.project`. `warnings` lists what was dropped, for the log (the rest still works).
  */
 function normalize(raw) {
@@ -94,6 +94,7 @@ function normalize(raw) {
     lanes,
     rowsPerLane: int(p.rowsPerLane, 1, 300, 10),
     markReadOnOpen: typeof p.markReadOnOpen === 'boolean' ? p.markReadOnOpen : true,
+    myIssues: p.myIssues === true,
     exclude,
     pollMinutes: int(p.pollMinutes, 2, 15, 2),
     warnings,

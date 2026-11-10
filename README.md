@@ -5,7 +5,7 @@ server next to your Claude Code sessions:
 
 - **Review requested**: pull requests waiting for your review (yours or your team's).
 - **My pull requests**: your open PRs, with what happened last (a review, a comment, CI failing, a conflict).
-- **Issues**: issues assigned to you or mentioning you.
+- **Issues**: issues assigned to you or mentioning you, and, if you turn it on, the issues you opened.
 - **Failed runs**: Actions runs on your open PRs that failed in the last 7 days, until a later run of the same job
   passes.
 
@@ -71,6 +71,7 @@ and every project uses them; a project that works on another server overrides th
 | Access token | none | stored encrypted by the app, never in a settings file |
 | Lanes | all on | a lane that is off is not fetched and never reaches Inbox |
 | Items per lane | 10 | the rest are behind Show all |
+| Also issues I opened | off | your open issues in the Issues lane even when nobody assigned them (labelled `my-issue`) |
 | Mark an item read when I open it | on | |
 | Leave out | none | owners (`acme`) or repositories (`acme/widgets`) |
 | Check every (minutes) | 2 | 2 to 15; failed runs at most every 5 minutes |
@@ -83,7 +84,7 @@ the token with it; nothing rebinds on its own.
 
 Items carry these labels:
 - **Kind:** `pr`, `issue`, `run`.
-- **Your role:** `review-requested`, `team-review-requested`, `my-pr`, `assigned`, `mentioned`.
+- **Your role:** `review-requested`, `team-review-requested`, `my-pr`, `my-issue`, `assigned`, `mentioned`.
 - **PR state:** `changes-requested`, `approved`, `ci:failed`, `ci:pending`, `conflict`, `draft`.
 - **Where:** `repo:<owner>/<repo>`, `owner:<owner>`.
 

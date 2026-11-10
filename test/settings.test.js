@@ -14,6 +14,7 @@ test('defaults for an empty or missing project: no server, no token', () => {
       lanes: { reviewRequested: true, myPrs: true, issues: true, failedRuns: true },
       rowsPerLane: 10,
       markReadOnOpen: true,
+      myIssues: false,
       exclude: [],
       pollMinutes: 2,
       warnings: [],
@@ -36,6 +37,8 @@ test('lanes, numbers and the flag: kept when valid, clamped or defaulted otherwi
   assert.equal(s.rowsPerLane, 300)
   assert.equal(s.pollMinutes, 2)
   assert.equal(s.markReadOnOpen, false)
+  assert.equal(normalize({ myIssues: true }).myIssues, true)
+  assert.equal(normalize({ myIssues: 'yes' }).myIssues, false)
   assert.equal(normalize({ pollMinutes: 99 }).pollMinutes, 15)
   assert.equal(normalize({ rowsPerLane: 2.5 }).rowsPerLane, 10)
 })

@@ -57,7 +57,7 @@
               },
               "issues": {
                 "type": "boolean",
-                "title": "Issues (assigned or mentioning me)",
+                "title": "Issues (assigned to me or mentioning me)",
                 "default": true
               },
               "failedRuns": {
@@ -72,6 +72,12 @@
               "issues": true,
               "failedRuns": true
             }
+          },
+          "myIssues": {
+            "type": "boolean",
+            "title": "Also issues I opened",
+            "description": "Add the open issues you opened to the Issues lane, even when nobody assigned them to you.",
+            "default": false
           },
           "rowsPerLane": {
             "type": "integer",

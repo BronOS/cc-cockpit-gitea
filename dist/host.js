@@ -311,7 +311,7 @@ function start(ctx, deps = {}) {
       }
       await probe.get(c)
       const teamIds = settings.lanes.reviewRequested ? await enricher.teams(c) : new Set()
-      const { results } = await searchAll(c, settings.lanes)
+      const { results } = await searchAll(c, settings.lanes, { myIssues: settings.myIssues })
       const enriched = await enricher.enrich(c, results)
       const items = buildItems(results, enriched, settings, { me, base: c.server.base, teamIds })
       await failedRunsNow(c, items)

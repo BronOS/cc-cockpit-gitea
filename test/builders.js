@@ -50,7 +50,7 @@ const comment = (user, h, body = 'hello') => ({ user: { login: user }, created_a
  * Actions task list (or a status number for an error).
  */
 function worldRoutes(world) {
-  const laneOf = (q) => (q.get('review_requested') ? 'reviewRequested' : q.get('created') ? 'myPrs' : q.get('assigned') ? 'assigned' : 'mentioned')
+  const laneOf = (q) => (q.get('review_requested') ? 'reviewRequested' : q.get('created') ? (q.get('type') === 'issues' ? 'created' : 'myPrs') : q.get('assigned') ? 'assigned' : 'mentioned')
   return [
     ['GET', '/repos/issues/search', (u) => (u.searchParams.get('page') && u.searchParams.get('page') !== '1' ? json([]) : json((world.search || {})[laneOf(u.searchParams)] || []))],
     ['GET', '/user/teams', () => json((world.teams || []).map((id) => ({ id, name: `team${id}` })))],
