@@ -1,7 +1,7 @@
 {
   "id": "bronos.gitea",
   "name": "Gitea / Forgejo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "api": 1,
   "main": "dist/host.js",
   "description": "Your Gitea or Forgejo work in lanes: pull requests waiting for your review, what happens on your own PRs, issues assigned to or mentioning you, and your failed CI runs, with unread marks and Discuss with Claude. Signs in with a server address and an access token. Writes only to mark the server's notifications read and, where the server can, to re-run failed jobs. Provides an inbox-feed for Inbox.",
