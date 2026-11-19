@@ -10,7 +10,11 @@
 //   the item, check and job addresses), plus any address under the configured server, http(s) only; a page message naming anything else is refused (the page
 //   is untrusted content's renderer, so a URL from it is never opened as is);
 // - the toolbar buttons for our own items, only on overlays this plugin opened (`info.opener`, the app's record,
-//   not anything in the spec) and only for an item still in the list;
+//   not anything in the spec) and only for an item still in the list; Mark read and Done close the overlay unless
+//   Inbox's "Close the item after Mark read or Done" was off when it asked for the open (`act(id, 'open',
+//   { closeOnAction: false })`, kept in the overlay's type data, which we wrote, so the buttons see it); an open
+//   from our own panel, or from an Inbox older than the setting, closes as the default. Mark unread never closes
+//   (a "look again later" action), nor does a failed action (it throws);
 // - Discuss with Claude's text (details.discussText).
 
 const { discussText } = require('./details')
@@ -77,9 +81,18 @@ const TOOLBAR_ICON = { openWeb: 'open-external', rerun: 'refresh', done: 'check'
  * `act(id, action)` (the feed's act), `getHost()` (the probe's info or null), `getServer()` (`{ origin, prefix }` or
  * null). Returns `{ open, register }`.
  */
+/** Actions that close the overlay after they worked, unless the opener said `closeOnAction: false`. */
+const CLOSES = new Set(['markRead', 'done'])
+
+/** Whether an open's options (from Inbox, untrusted) turn closing off: only a literal `false` does. */
+const keepsOpen = (opts) => opts !== null && typeof opts === 'object' && opts.closeOnAction === false
+
 function createOverlays({ ctx, getItem, fetchDetails, onOpened, act, getHost = () => null, getServer = () => null, log }) {
-  /** Open an item's overlay: `{ ok }`, or `{ ok: false, message }` when the app refused it. */
-  async function open(item) {
+  /**
+   * Open an item's overlay: `{ ok }`, or `{ ok: false, message }` when the app refused it. `opts` is the feed
+   * act's third argument (`{ closeOnAction }`), absent from our own panel.
+   */
+  async function open(item, opts) {
     let handle
     try {
       handle = ctx.overlay.start({
@@ -88,7 +101,7 @@ function createOverlays({ ctx, getItem, fetchDetails, onOpened, act, getHost = (
         title: item.title.length > 100 ? `${item.title.slice(0, 99)}…` : item.title,
         size: 'large',
         ready: 'manual',
-        type: { name: 'inbox-item', data: { source: ctx.pluginId, id: item.id } },
+        type: { name: 'inbox-item', data: { source: ctx.pluginId, id: item.id, ...(keepsOpen(opts) ? { closeOnAction: false } : {}) } },
       })
     } catch (e) {
       return { ok: false, message: `Cannot open the item: ${e && e.message ? e.message : e}` }
@@ -165,7 +178,7 @@ function createOverlays({ ctx, getItem, fetchDetails, onOpened, act, getHost = (
           run: async () => {
             const r = await act(item.id, a.id)
             if (r && r.ok === false) throw new Error(r.message)
-            return a.id === 'done' ? { close: true } : undefined
+            return CLOSES.has(a.id) && d.closeOnAction !== false ? { close: true } : undefined
           },
         }))
     })

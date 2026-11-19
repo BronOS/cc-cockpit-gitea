@@ -87,7 +87,7 @@ function sorted(items) {
 /**
  * `emit(event, data)` is ctx.services.emit bound to 'inbox-feed'; `getSettings()` the normalised settings;
  * `getHost()` the probe's info or null;
- * `handlers` `{ mark(item, action), open(item), rerun(item), openWeb(item) }`, each resolving
+ * `handlers` `{ mark(item, action), open(item, opts), rerun(item), openWeb(item) }`, each resolving
  * `{ ok, message? }` or nothing (ok). Returns `{ provider, setItems, setState, restore, current, items, told }`.
  */
 function createFeed({ emit, getSettings, getHost = () => null, handlers, now = Date.now, log }) {
@@ -129,14 +129,16 @@ function createFeed({ emit, getSettings, getHost = () => null, handlers, now = D
     snapshot() {
       return syncData()
     },
-    async act(id, action) {
+    // `opts` (Inbox 0.2.7+, with `open` only): `{ closeOnAction }`, the person's Inbox setting, passed on to the
+    // overlay untouched; it comes from another plugin, so overlay.js reads only `closeOnAction === false` from it.
+    async act(id, action, opts) {
       const item = list.find((i) => i.id === id)
       if (!item) return { ok: false, message: 'That item is no longer in the list.' }
       if (!actionsOf(item, getHost()).some((a) => a.id === action)) return { ok: false, message: `"${cut(action, 40)}" is not an action of that item now.` }
       try {
         let r
         if (action === 'markRead' || action === 'markUnread' || action === 'done') r = await handlers.mark(item, action)
-        else if (action === 'open') r = await handlers.open(item)
+        else if (action === 'open') r = await handlers.open(item, opts)
         else if (action === 'rerun') r = await handlers.rerun(item)
         else if (action === 'openWeb') r = await handlers.openWeb(item)
         if (r && r.ok === false) return { ok: false, message: cut(r.message || 'It did not work.', MSG) }

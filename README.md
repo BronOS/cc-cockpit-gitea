@@ -15,6 +15,10 @@ Each lane has unread marks. A click opens the item in an overlay:
 - **Issue:** its body and comments.
 - **Failed run:** its jobs, with their log tails where the server has the API.
 
+The overlay's toolbar has Open on Gitea (or Forgejo), Mark read (or Mark unread) and Mark done. Mark read and Mark
+done close the overlay, unless you turned off Inbox's "Close the item after Mark read or Done" and opened the item
+from Inbox; Mark unread keeps it open.
+
 **Discuss with Claude** sends the item, its URL and what failed to a Claude session.
 
 It also feeds the [Inbox](https://github.com/BronOS/cc-cockpit-inbox) plugin: every item shows there under Gitea (or

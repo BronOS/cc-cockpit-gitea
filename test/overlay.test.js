@@ -110,9 +110,39 @@ test('buttons: only on overlays we opened, for our own current items; run goes t
     ['done', 'Mark done', 'check'],
   ])
   assert.equal(await buttons[0].run(), undefined)
-  assert.equal(await buttons[1].run(), undefined)
+  assert.deepEqual(await buttons[1].run(), { close: true }, 'Mark read closes (Inbox setting on by default)')
   assert.deepEqual(await buttons[2].run(), { close: true })
   assert.deepEqual(acted, [[item.id, 'openWeb'], [item.id, 'markRead'], [item.id, 'done']])
+})
+
+test('closeOnAction: Inbox passes it with the open; only false keeps Mark read and Done open; Mark unread never closes', async () => {
+  const dataOf = async (opts) => {
+    const { ctx, o } = setup()
+    await o.open(item, opts)
+    return ctx.overlays[0].spec.type.data
+  }
+  assert.deepEqual(await dataOf({ closeOnAction: false }), { source: 'bronos.gitea', id: item.id, closeOnAction: false })
+  for (const opts of [undefined, { closeOnAction: true }, { closeOnAction: 'false' }, { closeOnAction: 0 }, null, 'x']) {
+    assert.deepEqual(await dataOf(opts), { source: 'bronos.gitea', id: item.id }, JSON.stringify(opts))
+  }
+
+  const { ctx, o, acted } = setup()
+  o.register()
+  const provider = ctx.buttonProviders[0].provider
+  const info = (data) => ({ type: { name: 'inbox-item', data: { source: 'bronos.gitea', id: item.id, ...data } }, opener: 'bronos.gitea' })
+  const runs = async (data) => Promise.all(provider(info(data)).map(async (b) => [b.id, await b.run()]))
+  assert.deepEqual(await runs({ closeOnAction: false }), [['openWeb', undefined], ['markRead', undefined], ['done', undefined]])
+  // Junk is not false: closes, as with an older Inbox (no field at all).
+  assert.deepEqual(await runs({ closeOnAction: 'no' }), [['openWeb', undefined], ['markRead', { close: true }], ['done', { close: true }]])
+  item.read = true
+  try {
+    const marks = provider(info()).filter((b) => b.id === 'markUnread')
+    assert.equal(marks.length, 1)
+    assert.equal(await marks[0].run(), undefined, 'Mark unread: look again later, never closes')
+  } finally {
+    item.read = false
+  }
+  assert.equal(acted.length, 7)
 })
 
 test('buttons: a refused action shows its message (the app shows a throw)', async () => {
@@ -120,6 +150,8 @@ test('buttons: a refused action shows its message (the app shows a throw)', asyn
   o.register()
   const [b] = ctx.buttonProviders[0].provider({ type: { name: 'inbox-item', data: { source: 'bronos.gitea', id: item.id } }, opener: 'bronos.gitea' })
   await assert.rejects(b.run(), /still going/)
+  const mark = ctx.buttonProviders[0].provider({ type: { name: 'inbox-item', data: { source: 'bronos.gitea', id: item.id } }, opener: 'bronos.gitea' }).find((x) => x.id === 'markRead')
+  await assert.rejects(mark.run(), /still going/, 'a failed Mark read throws: the overlay stays')
 })
 
 test('hrefsIn and linksOf: http(s) only, entities decoded', () => {
