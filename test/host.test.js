@@ -75,6 +75,14 @@ test('Open on the server opens only an address under the configured base', async
   assert.equal(host._webUrl({ _: { url: `${BASE}/git/a` } }, null), null)
 })
 
+test("Inbox's open with closeOnAction: false reaches the overlay's type data; the panel's open has none", async () => {
+  const { ctx } = await boot({ search: { myPrs: [issue(1)] } })
+  assert.deepEqual(await ctx.callService('inbox-feed', 'act', ['pr:acme/widgets#1', 'open', { closeOnAction: false }]), { ok: true })
+  assert.deepEqual(ctx.overlays.at(-1).spec.type.data, { source: 'bronos.gitea', id: 'pr:acme/widgets#1', closeOnAction: false })
+  await ctx.sendPanel({ type: 'act', id: 'pr:acme/widgets#1', action: 'open' })
+  assert.deepEqual(ctx.overlays.at(-1).spec.type.data, { source: 'bronos.gitea', id: 'pr:acme/widgets#1' })
+})
+
 test('done hides the item, tells Inbox gone, survives the next poll, marks the server notification read', async () => {
   let patched = 0
   const routes = [

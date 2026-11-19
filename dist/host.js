@@ -153,7 +153,7 @@ function start(ctx, deps = {}) {
     emit: (event, data) => ctx.services.emit('inbox-feed', event, data),
     getSettings: () => settings,
     getHost: () => probe.current,
-    handlers: { mark, open: (i) => hooks.open(i), rerun: (i) => hooks.rerun(i), openWeb },
+    handlers: { mark, open: (i, o) => hooks.open(i, o), rerun: (i) => hooks.rerun(i), openWeb },
     now,
     log,
   })
@@ -391,7 +391,7 @@ function start(ctx, deps = {}) {
     getServer: () => (client ? client.server : null),
     log,
   })
-  hooks.open = (item) => overlays.open(item)
+  hooks.open = (item, opts) => overlays.open(item, opts)
 
   const disposers = []
   const ready = (async () => {

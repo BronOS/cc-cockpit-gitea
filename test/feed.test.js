@@ -32,7 +32,7 @@ function setup(settings = normalize({}), host = GITEA) {
   const calls = []
   const handlers = {
     mark: async (it, a) => (calls.push(['mark', it.id, a]), undefined),
-    open: async (it) => (calls.push(['open', it.id]), undefined),
+    open: async (it, opts) => (calls.push(['open', it.id, ...(opts === undefined ? [] : [opts])]), undefined),
     rerun: async (it) => (calls.push(['rerun', it.id]), { ok: false, message: 'The run is still going.' }),
     openWeb: async (it) => (calls.push(['openWeb', it.id]), undefined),
   }
@@ -136,12 +136,15 @@ test('act: checks the id and the action, calls the handler, passes its refusal o
   assert.deepEqual(await feed.provider.act('a1', 'openWeb'), { ok: true })
   assert.deepEqual(await feed.provider.act('a1', 'done'), { ok: true })
   assert.deepEqual(await feed.provider.act('r1', 'rerun'), { ok: false, message: 'The run is still going.' })
+  // Inbox's third argument goes to the open handler as it came (the overlay reads only `closeOnAction === false`).
+  assert.deepEqual(await feed.provider.act('a1', 'open', { closeOnAction: false }), { ok: true })
   assert.deepEqual(calls, [
     ['mark', 'a1', 'markRead'],
     ['open', 'a1'],
     ['openWeb', 'a1'],
     ['mark', 'a1', 'done'],
     ['rerun', 'r1'],
+    ['open', 'a1', { closeOnAction: false }],
   ])
 })
 
